@@ -1,23 +1,11 @@
-FROM maven:3.8.4 AS build
-WORKDIR /app
+FROM eclipse-temurin:17-jdk-alpine
 
-# Copy the Maven project files and build the application
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package
+VOLUME /tmp
 
-# Stage 2: Create a lightweight image to run the application
-FROM openjdk:11-jre-slim
-WORKDIR /app
+ARG JAR_FILE
 
-# Copy the JAR file from the build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY ${JAR_FILE} app.jar
 
-# Remove all .jar files from the current directory
-RUN rm -f *.jar
-
-# Expose port 8080 for the Spring Boot application
 EXPOSE 8080
 
-# Entry point to run the Spring Boot application
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/app.jar"]
