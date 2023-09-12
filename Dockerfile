@@ -1,13 +1,19 @@
-FROM eclipse-temurin:17-jdk-jammy as builder
-WORKDIR /opt/app
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-#RUN ./mvnw dependency:go-offline
-COPY ./src ./src
-RUN ./mvnw clean install
- 
-FROM eclipse-temurin:17-jre-jammy
-WORKDIR /opt/app
+# First stage: complete build environment
+FROM maven:3.5.0-jdk-17-alpine AS builder
+
+# add pom.xml and source code
+ADD ./pom.xml pom.xml
+ADD ./src src/
+
+# package jar
+RUN mvn clean package
+
+# Second stage: minimal runtime environment
+From openjdk:17-jre-alpine
+
+# copy jar from the first stage
+COPY --from=builder target/my-app-1.0-SNAPSHOT.jar my-app-1.0-SNAPSHOT.jar
+
 EXPOSE 8080
-COPY --from=builder /opt/app/target/*.jar /opt/app/*.jar
-ENTRYPOINT ["java", "-jar", "/opt/app/*.jar" ]
+
+CMD ["java", "-jar", "my-app-1.0-SNAPSHOT.jar"]
