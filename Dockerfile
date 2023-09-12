@@ -1,19 +1,23 @@
-# First stage: complete build environment
-FROM maven:3.5.0-jdk-17-alpine AS builder
+FROM maven:3.8.4 AS build
+WORKDIR /app
 
-# add pom.xml and source code
-ADD ./pom.xml pom.xml
-ADD ./src src/
-
-# package jar
+# Copy the Maven project files and build the application
+COPY pom.xml .
+COPY src ./src
 RUN mvn clean package
 
-# Second stage: minimal runtime environment
-From openjdk:17-jre-alpine
+# Stage 2: Create a lightweight image to run the application
+FROM openjdk:11-jre-slim
+WORKDIR /app
 
-# copy jar from the first stage
-COPY --from=builder target/my-app-1.0-SNAPSHOT.jar my-app-1.0-SNAPSHOT.jar
+# Copy the JAR file from the build stage
+COPY --from=build /app/target/*.jar app.jar
 
+# Remove all .jar files from the current directory
+RUN rm -f *.jar
+
+# Expose port 8080 for the Spring Boot application
 EXPOSE 8080
 
-CMD ["java", "-jar", "my-app-1.0-SNAPSHOT.jar"]
+# Entry point to run the Spring Boot application
+CMD ["java", "-jar", "app.jar"]

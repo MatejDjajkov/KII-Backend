@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: finki.mk.uiktBackend.UIKTBackendApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.794 s - in finki.mk.uiktBackend.UIKTBackendApplicationTests
